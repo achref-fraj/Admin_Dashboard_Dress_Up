@@ -1,7 +1,6 @@
 import { signOut, useSession } from "next-auth/react"
-import Image from "next/image";
 import { useRouter } from "next/router";
-
+import { useState,useEffect } from "react";
 export default function Settings() {
   const { data: session } = useSession();
   const router = useRouter();
@@ -30,7 +29,7 @@ export default function Settings() {
                     <input
                       type="text"
                       className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-md sm:leading-6"
-                      value={session.user.name}
+                      value="Achref fraj"
                     />
                   </div>
                 </div>
@@ -45,28 +44,14 @@ export default function Settings() {
               </div>
 
               <div className="col-span-full">
-                <label htmlFor="photo" className="block text-md font-medium leading-6 text-gray-900">
-                  Photo
-                </label>
-                <div className="mt-2 flex items-center gap-x-3">
-                  <div className="w-10 h-10">
-                    <Image class="h-full w-full rounded-full object-contain object-center" src={session.user.image} alt={session.user.email} width={34} height={34} />
-                  </div>
-
-                  <button
-                    type="button"
-                    className="rounded-md bg-white px-2.5 py-1.5 text-md font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                  >
-                    Change
-                  </button>
-                </div>
+                
               </div>
             </div>
           </div>
 
           <div className="border-b border-gray-900/10 pb-12">
             <h2 className="text-base font-semibold leading-7 text-gray-900">Personal Information</h2>
-            <p className="mt-1 text-md leading-6 text-gray-600">You can only view your information, you won&apos;t be able to edit.</p>
+            <p className="mt-1 text-md leading-6 text-gray-600">You can only view your information, you won't be able to edit.</p>
 
             <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
               <div className="sm:col-span-3">
@@ -77,7 +62,7 @@ export default function Settings() {
                   <input
                     type="text"
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-md sm:leading-6 pl-6"
-                    value={session.user.name.split(' ')[0]}
+                    value="Achref"
                   />
                 </div>
               </div>
@@ -90,7 +75,7 @@ export default function Settings() {
                   <input
                     type="text"
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-md sm:leading-6 pl-6"
-                    value={session.user.name.split(' ')[1]}
+                    value="Fraj"
                   />
                 </div>
               </div>
@@ -103,7 +88,7 @@ export default function Settings() {
                   <input
                     type="email"
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-md sm:leading-6 pl-6"
-                    value={session.user.email}
+                    value={"achref08fraj@gmail.com"}
                   />
                 </div>
               </div>

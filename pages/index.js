@@ -1,25 +1,48 @@
-import { useSession, signIn, signOut } from "next-auth/react"
+import { signIn } from 'next-auth/react';
 import Link from "next/link";
 import { useState } from "react";
 import { useEffect } from "react";
 import axios from "axios";
+import { mongooseConnect } from '@/lib/mongoose';
+import { Client } from '@/models/Client';
+import { useSession  } from "next-auth/react"  
+
 
 const formatPrice = (price) => {
   return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };
 
 
-export default function Home() {
+export default function Home({ clients }) {
   const [isLoading, setIsLoading] = useState(false);
-  const { data: session } = useSession()
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  // const handleLogout = async () => {
-  //   await signOut();
-  //   router.replace('/');
-  // };
+  const [loggedIn, setLoggedIn] = useState();
+  const { data: session } = useSession()
 
-  useEffect(() => {
+//**************************************************************************************
+const [email, setEmail] = useState('');
+const [password, setPassword] = useState('');
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  // Sign in logic
+  const result = await signIn('credentials', {
+    redirect: false,
+    email,
+    password,
+  });
+
+  if (result.error) {
+    console.error('Failed to sign in:', result.error);
+  } else {
+    // Redirect to admin dashboard or another page
+    window.location.href = '/';
+  }
+};
+
+  //****************************************************** */
+  useEffect(() => { 
     axios.get('/api/products').then(response => {
 
       setProducts(response.data);
@@ -35,19 +58,18 @@ export default function Home() {
   const totalImagesCount = products.reduce((total, product) => total + product.images.length, 0);
   const totalPrice = products.reduce((total, product) => total + product.price, 0);
 
+
   if (session) {
     return <>
       <main
         className={` min-h-screen p-4 `}
       >
-        {/* Signed in as {session.user.email} <br />
-      <button onClick={() => signOut()}>Sign out</button> */}
         <header>
           <div className="mx-auto  px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
             <div className="sm:flex sm:items-center sm:justify-between">
               <div className="text-center sm:text-left">
                 <h1 className="text-3xl font-bold text-gray-900 sm:text-3xl">
-                  Welcome Back, <span className="text-green-700 font-bold">{session.user.name}</span>
+                  Welcome Back, <span className="text-green-700 font-bold">Admin</span>
                 </h1>
 
                 <p className="mt-1.5 text-md text-gray-500 max-w-md">
@@ -111,7 +133,7 @@ export default function Home() {
               <div>
                 <p className="text-sm text-gray-500">Profit</p>
 
-                <p className="text-2xl font-medium text-gray-900">Ksh {formatPrice(totalPrice)}</p>
+                <p className="text-2xl font-medium text-gray-900">DT {formatPrice(totalPrice)}</p>
               </div>
 
               <div className="inline-flex gap-2 rounded bg-green-100 p-1 text-green-600">
@@ -192,40 +214,122 @@ export default function Home() {
             </article>
 
           </div>
+          <div className="h-32 rounded-lg bg-gray-200 flex items-center justify-center">
+      <article className="flex max-md:flex-col items-end justify-between rounded-lg gap-4">
+        <div>
+          <p className="text-sm text-gray-500">Clients</p>
+          <p className="text-2xl font-medium text-gray-900">{clients.length}</p>
+        </div>
+        <div className="inline-flex gap-2 rounded bg-green-100 p-1 text-green-600">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+            />
+          </svg>
+          <span className="text-xs font-medium">{clients.length}</span>
+        </div>
+      </article>
+    </div>
+
         </div>
       </main>
     </>
   }
 
-  return <>
+  return<>
+   <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-lg">
+        <h2 className="text-3xl font-bold text-center text-gray-900">Sign in to your account</h2>
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          <input type="hidden" name="remember" defaultValue="true" />
+          <div className="rounded-md shadow-sm">
+            <div className="mb-4">
+                <p>Email</p>
+              <label htmlFor="email-address" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="email-address"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div>
+            <p>Password</p>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          </div>
 
-    <main
-      className={`flex min-h-screen flex-col items-center justify-center p-5 text-center `}
-    >
-      <div className="max-w-xl lg:max-w-3xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <input
+                id="remember-me"
+                name="remember-me"
+                type="checkbox"
+                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+              />
+              <label htmlFor="remember-me" className="block ml-2 text-sm text-gray-900">
+                Remember me
+              </label>
+            </div>
 
-        <h1
-          className="mt-6 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl"
-        >
-          Welcome to my-Shop
-        </h1>
+            <div className="text-sm">
+              <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
+                Forgot your password?
+              </a>
+            </div>
+          </div>
 
-        <p className="mt-4 leading-relaxed text-gray-500 max-w-sm">
-          This website is only accessible to admins only. Add new products and manage database.
-        </p>
-        <div className="col-span-6 sm:flex sm:items-center sm:gap-4 my-4 flex items-center justify-center">
-          <button
-            disabled={isLoading}
-            onClick={() => {
-              setIsLoading(true);
-              signIn('google');
-            }}
-            className="inline-block shrink-0 rounded-md border border-blue-600 bg-blue-600 px-12 py-3 text-sm font-medium text-white transition hover:bg-transparent hover:text-blue-600 focus:outline-none focus:ring active:text-blue-500"
-          >
-            Login With Google
-          </button>
-        </div>
+          <div>
+            <button
+              type="submit"
+              className="relative flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md group hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              Sign in
+            </button>
+          </div>
+        </form>
       </div>
-    </main>
-  </>
+    </div>
+</>
+
+}
+
+export async function getServerSideProps() {
+  await mongooseConnect();
+  const clients = await Client.find({}); // Fetch all clients
+
+  return {
+    props: {
+      clients: JSON.parse(JSON.stringify(clients)),
+    },
+  };
 }
